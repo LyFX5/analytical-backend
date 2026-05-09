@@ -54,6 +54,26 @@ class SyntheticFleetGenerator:
 
         df = pd.DataFrame(records)
         return df
+    
+    def to_excel(self, filepath: str, **kwargs):
+        """Export synthetic data to Excel file for testing ingestion."""
+        # Pivot to create a more realistic Excel structure
+        df_wide = self.generate()
+        
+        # Add entity_name column
+        df_wide['entity_name'] = df_wide['entity_id'].apply(lambda x: f"Entity_{x:04d}")
+        
+        # Reorder columns to match expected EU MRV format
+        columns_order = [
+            'entity_name', 'operator_id', 'type', 'size', 'age',
+            'year', 'fuel', 'co2', 'km'
+        ]
+        
+        df_export = df_wide[columns_order].copy()
+        
+        # Export to Excel
+        df_export.to_excel(filepath, index=False, **kwargs)
+        return filepath
 
 
 class DataLoader:
